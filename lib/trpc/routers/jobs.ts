@@ -29,10 +29,11 @@ export const jobsRouter = router({
         where.vesselId = input.vesselId;
       }
 
-      // If user is crew, only show jobs assigned to them
-      if (ctx.session?.user.role === 'CREW') {
-        where.assignedTo = ctx.session.user.id;
-      }
+        // If user is crew, only show jobs assigned to them
+        const sessionUser = ctx.session?.user as { id: string; role?: string } | undefined;
+        if (sessionUser?.role === 'CREW') {
+          where.assignedTo = sessionUser.id;
+        }
 
       const items = await ctx.prisma.cleaningJob.findMany({
         where,
@@ -117,13 +118,14 @@ export const jobsRouter = router({
         },
       });
 
-      // Check if crew user can access this job
-      if (ctx.session?.user.role === 'CREW' && job.assignedTo !== ctx.session.user.id) {
-        throw new TRPCError({
-          code: 'FORBIDDEN',
-          message: 'You can only access jobs assigned to you',
-        });
-      }
+        // Check if crew user can access this job
+        const sessionUser2 = ctx.session?.user as { id: string; role?: string } | undefined;
+        if (sessionUser2?.role === 'CREW' && job.assignedTo !== sessionUser2.id) {
+          throw new TRPCError({
+            code: 'FORBIDDEN',
+            message: 'You can only access jobs assigned to you',
+          });
+        }
 
       return job;
     }),
@@ -180,13 +182,14 @@ export const jobsRouter = router({
         where: { id: input.id },
       });
 
-      // Check if crew user can access this job
-      if (ctx.session?.user.role === 'CREW' && job.assignedTo !== ctx.session.user.id) {
-        throw new TRPCError({
-          code: 'FORBIDDEN',
-          message: 'You can only update jobs assigned to you',
-        });
-      }
+        // Check if crew user can access this job
+        const sessionUser3 = ctx.session?.user as { id: string; role?: string } | undefined;
+        if (sessionUser3?.role === 'CREW' && job.assignedTo !== sessionUser3.id) {
+          throw new TRPCError({
+            code: 'FORBIDDEN',
+            message: 'You can only update jobs assigned to you',
+          });
+        }
 
       const updateData: any = {
         status: input.status,
@@ -231,31 +234,32 @@ export const jobsRouter = router({
       });
     }),
 
-  myJobs: crewProcedure.query(async ({ ctx }) => {
-    return ctx.prisma.cleaningJob.findMany({
-      where: {
-        assignedTo: ctx.session.user.id,
-        status: { in: [JobStatus.DRAFT, JobStatus.IN_PROGRESS] },
-      },
-      include: {
-        vessel: {
-          include: {
-            client: {
-              select: {
-                name: true,
+    myJobs: crewProcedure.query(async ({ ctx }) => {
+      const sessionUser = ctx.session?.user as { id: string };
+      return ctx.prisma.cleaningJob.findMany({
+        where: {
+          assignedTo: sessionUser.id,
+          status: { in: [JobStatus.DRAFT, JobStatus.IN_PROGRESS] },
+        },
+        include: {
+          vessel: {
+            include: {
+              client: {
+                select: {
+                  name: true,
+                },
               },
             },
           },
-        },
-        progress: {
-          select: {
-            percent: true,
+          progress: {
+            select: {
+              percent: true,
+            },
           },
         },
-      },
-      orderBy: {
-        scheduledAt: 'asc',
-      },
-    });
-  }),
+        orderBy: {
+          scheduledAt: 'asc',
+        },
+      });
+    }),
 });
