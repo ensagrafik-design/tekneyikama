@@ -14,17 +14,18 @@ export const progressRouter = router({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      // Check if crew user can access this job
-      const job = await ctx.prisma.cleaningJob.findUniqueOrThrow({
-        where: { id: input.cleaningJobId },
-      });
-
-      if (ctx.session?.user.role === 'CREW' && job.assignedTo !== ctx.session.user.id) {
-        throw new TRPCError({
-          code: 'FORBIDDEN',
-          message: 'You can only update jobs assigned to you',
+        // Check if crew user can access this job
+        const job = await ctx.prisma.cleaningJob.findUniqueOrThrow({
+          where: { id: input.cleaningJobId },
         });
-      }
+
+        const sessionUser = ctx.session?.user as { id: string; role?: string } | undefined;
+        if (sessionUser?.role === 'CREW' && job.assignedTo !== sessionUser.id) {
+          throw new TRPCError({
+            code: 'FORBIDDEN',
+            message: 'You can only update jobs assigned to you',
+          });
+        }
 
       return ctx.prisma.cleaningSectionProgress.upsert({
         where: {
@@ -56,20 +57,21 @@ export const progressRouter = router({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      // Check if crew user can access this progress record
-      const progress = await ctx.prisma.cleaningSectionProgress.findUniqueOrThrow({
-        where: { id: input.progressId },
-        include: {
-          cleaningJob: true,
-        },
-      });
-
-      if (ctx.session?.user.role === 'CREW' && progress.cleaningJob.assignedTo !== ctx.session.user.id) {
-        throw new TRPCError({
-          code: 'FORBIDDEN',
-          message: 'You can only add media to jobs assigned to you',
+        // Check if crew user can access this progress record
+        const progress = await ctx.prisma.cleaningSectionProgress.findUniqueOrThrow({
+          where: { id: input.progressId },
+          include: {
+            cleaningJob: true,
+          },
         });
-      }
+
+        const sessionUser2 = ctx.session?.user as { id: string; role?: string } | undefined;
+        if (sessionUser2?.role === 'CREW' && progress.cleaningJob.assignedTo !== sessionUser2.id) {
+          throw new TRPCError({
+            code: 'FORBIDDEN',
+            message: 'You can only add media to jobs assigned to you',
+          });
+        }
 
       return ctx.prisma.media.create({
         data: {
@@ -84,23 +86,24 @@ export const progressRouter = router({
   deleteMedia: crewProcedure
     .input(z.object({ id: z.string() }))
     .mutation(async ({ ctx, input }) => {
-      const media = await ctx.prisma.media.findUniqueOrThrow({
-        where: { id: input.id },
-        include: {
-          progress: {
-            include: {
-              cleaningJob: true,
+        const media = await ctx.prisma.media.findUniqueOrThrow({
+          where: { id: input.id },
+          include: {
+            progress: {
+              include: {
+                cleaningJob: true,
+              },
             },
           },
-        },
-      });
-
-      if (ctx.session?.user.role === 'CREW' && media.progress.cleaningJob.assignedTo !== ctx.session.user.id) {
-        throw new TRPCError({
-          code: 'FORBIDDEN',
-          message: 'You can only delete media from jobs assigned to you',
         });
-      }
+
+        const sessionUser3 = ctx.session?.user as { id: string; role?: string } | undefined;
+        if (sessionUser3?.role === 'CREW' && media.progress.cleaningJob.assignedTo !== sessionUser3.id) {
+          throw new TRPCError({
+            code: 'FORBIDDEN',
+            message: 'You can only delete media from jobs assigned to you',
+          });
+        }
 
       return ctx.prisma.media.delete({
         where: { id: input.id },
