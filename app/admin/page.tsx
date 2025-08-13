@@ -82,14 +82,14 @@ export default function AdminDashboard() {
             <div className="flex items-center space-x-4">
               <div className="w-2 h-2 bg-green-500 rounded-full"></div>
               <div className="flex-1">
-                <p className="text-sm font-medium">"Mavi Rüya" teknesi temizlik işi tamamlandı</p>
+                <p className="text-sm font-medium">&quot;Mavi Rüya&quot; teknesi temizlik işi tamamlandı</p>
                 <p className="text-xs text-muted-foreground">4 saat önce</p>
               </div>
             </div>
             <div className="flex items-center space-x-4">
               <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
               <div className="flex-1">
-                <p className="text-sm font-medium">Mehmet Temizci "Deniz Yıldızı" işini başlattı</p>
+                <p className="text-sm font-medium">Mehmet Temizci &quot;Deniz Yıldızı&quot; işini başlattı</p>
                 <p className="text-xs text-muted-foreground">6 saat önce</p>
               </div>
             </div>

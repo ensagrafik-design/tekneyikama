@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -252,16 +253,18 @@ export default function JobPage({ params }: JobPageProps) {
                           {progressRecord.media
                             .filter(m => m.kind === 'BEFORE')
                             .map((media) => (
-                              <div key={media.id} className="relative">
-                                <img
-                                  src={media.url}
-                                  alt={media.caption || "Önce"}
-                                  className="w-full h-32 object-cover rounded-md"
-                                />
-                                {media.caption && (
-                                  <p className="text-xs text-gray-600 mt-1">{media.caption}</p>
-                                )}
-                              </div>
+                                <div key={media.id} className="relative">
+                                  <Image
+                                    src={media.url}
+                                    alt={media.caption || "Önce"}
+                                    className="w-full h-32 object-cover rounded-md"
+                                    width={500}
+                                    height={500}
+                                  />
+                                  {media.caption && (
+                                    <p className="text-xs text-gray-600 mt-1">{media.caption}</p>
+                                  )}
+                                </div>
                             ))}
                         </div>
                       </TabsContent>
@@ -270,16 +273,18 @@ export default function JobPage({ params }: JobPageProps) {
                           {progressRecord.media
                             .filter(m => m.kind === 'AFTER')
                             .map((media) => (
-                              <div key={media.id} className="relative">
-                                <img
-                                  src={media.url}
-                                  alt={media.caption || "Sonra"}
-                                  className="w-full h-32 object-cover rounded-md"
-                                />
-                                {media.caption && (
-                                  <p className="text-xs text-gray-600 mt-1">{media.caption}</p>
-                                )}
-                              </div>
+                                <div key={media.id} className="relative">
+                                  <Image
+                                    src={media.url}
+                                    alt={media.caption || "Sonra"}
+                                    className="w-full h-32 object-cover rounded-md"
+                                    width={500}
+                                    height={500}
+                                  />
+                                  {media.caption && (
+                                    <p className="text-xs text-gray-600 mt-1">{media.caption}</p>
+                                  )}
+                                </div>
                             ))}
                         </div>
                       </TabsContent>

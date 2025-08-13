@@ -21,47 +21,49 @@ const isAuthed = t.middleware(({ next, ctx }) => {
   });
 });
 
-const isAdmin = t.middleware(({ next, ctx }) => {
-  if (!ctx.session?.user) {
-    throw new TRPCError({
-      code: 'UNAUTHORIZED',
-      message: 'Not authenticated',
+  const isAdmin = t.middleware(({ next, ctx }) => {
+    if (!ctx.session?.user) {
+      throw new TRPCError({
+        code: 'UNAUTHORIZED',
+        message: 'Not authenticated',
+      });
+    }
+    const sessionUser = ctx.session.user as { role?: string };
+    if (sessionUser.role !== 'ADMIN') {
+      throw new TRPCError({
+        code: 'FORBIDDEN',
+        message: 'Admin access required',
+      });
+    }
+    return next({
+      ctx: {
+        ...ctx,
+        session: ctx.session,
+      },
     });
-  }
-  if (ctx.session.user.role !== 'ADMIN') {
-    throw new TRPCError({
-      code: 'FORBIDDEN',
-      message: 'Admin access required',
-    });
-  }
-  return next({
-    ctx: {
-      ...ctx,
-      session: ctx.session,
-    },
   });
-});
 
-const isCrewOrAdmin = t.middleware(({ next, ctx }) => {
-  if (!ctx.session?.user) {
-    throw new TRPCError({
-      code: 'UNAUTHORIZED',
-      message: 'Not authenticated',
+  const isCrewOrAdmin = t.middleware(({ next, ctx }) => {
+    if (!ctx.session?.user) {
+      throw new TRPCError({
+        code: 'UNAUTHORIZED',
+        message: 'Not authenticated',
+      });
+    }
+    const sessionUser = ctx.session.user as { role?: string };
+    if (!['ADMIN', 'CREW'].includes(sessionUser.role || '')) {
+      throw new TRPCError({
+        code: 'FORBIDDEN',
+        message: 'Crew or admin access required',
+      });
+    }
+    return next({
+      ctx: {
+        ...ctx,
+        session: ctx.session,
+      },
     });
-  }
-  if (!['ADMIN', 'CREW'].includes(ctx.session.user.role)) {
-    throw new TRPCError({
-      code: 'FORBIDDEN',
-      message: 'Crew or admin access required',
-    });
-  }
-  return next({
-    ctx: {
-      ...ctx,
-      session: ctx.session,
-    },
   });
-});
 
 export const router = t.router;
 export const publicProcedure = t.procedure;
